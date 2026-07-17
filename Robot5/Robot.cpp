@@ -1,12 +1,12 @@
 ﻿#include "Robot.h"
 
 
-int InitSystem(double ratio[], double Pitch[], int pusle[], double HLimit[], double LLimit[])
+int InitSystem(double ratio[], double Pitch[], int pusle[], double HLimit[], double LLimit[], int dirReverse[], int wAxisMap[])
 {
     SYS_MAC_PARAM      stMacParam;
     SYS_ENCODER_CONFIG stENCConfig;
     SYS_CARD_CONFIG    stCardConfig;
-    int m_nAxisNum = 7;
+    int m_nAxisNum = 8;
     int nRtn;
     int g_nGroupIndex;
     MCS_SetSysMaxSpeed(1500);//1000mm/s
@@ -14,7 +14,7 @@ int InitSystem(double ratio[], double Pitch[], int pusle[], double HLimit[], dou
     //////////////////////////////////////////////////////////////////////////////////////////
     for (WORD wChannel = 0; wChannel < (m_nAxisNum); wChannel++)
     {
-        stMacParam.wPosToEncoderDir = 0;
+        stMacParam.wPosToEncoderDir = dirReverse[wChannel];
         stMacParam.dwPPR = pusle[wChannel];//10000;//8388608;//10000;//131072;
         stMacParam.wRPM = 3000;
         stMacParam.dfPitch = Pitch[wChannel];//40.0;
@@ -40,8 +40,8 @@ int InitSystem(double ratio[], double Pitch[], int pusle[], double HLimit[], dou
     }
     //  set group parameters
     MCS_CloseAllGroups();
-    g_nGroupIndex = MCS_CreateGroup(2, 0, 3, 4, 5, 6, -1, -1, 0);
-    int a = MCS_SetMirrorAxis(-1, 1, -1, -1, -1, -1, -1, -1, g_nGroupIndex);
+    g_nGroupIndex = MCS_CreateGroup(wAxisMap[0], wAxisMap[1], wAxisMap[2],
+        wAxisMap[3], wAxisMap[4], wAxisMap[5], wAxisMap[6], wAxisMap[7], 0);
     stCardConfig.wCardType = 4;
 
     nRtn = MCS_InitSystemEx(1, &stCardConfig, 1);

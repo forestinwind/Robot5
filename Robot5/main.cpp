@@ -9,11 +9,14 @@ int main()
 	double Ratio[8] = { 1.0, 1.0, 1.0, 10.0, 30.0, 75.0, 0, 0 };
 	double HLimit[8] = { 200,200,200,200,200,200,200,20 };
 	double LLimit[8] = { -200,-200,-200,-200,-200,-200,-200,20 };
+	int dirReverse[8] = { 0,0,0,0,1,1,0,0 };
+	int wAxisMap[8] = { 2, 0, 3, 4, 5, 6, -1, -1 };
 
-	InitSystem(Ratio, Pitch, Pusle, HLimit, LLimit);
+	InitSystem(Ratio, Pitch, Pusle, HLimit, LLimit, dirReverse, wAxisMap);
 	double x, y, z, rx, ry, rz, a, b;
 	MCS_GetCurRefPos(&x, &y, &z, &rx, &ry, &rz, &a, &b);
 	std::cout << x << "," << y << "," << z << "," << rx << "," << ry << "," << rz << std::endl;
+	MCS_SetPtPSpeed(1);
 	MCS_JogSpace(5, 1, 0);
 	MCS_PtPX(5);
 	MCS_GetCurRefPos(&x, &y, &z, &rx, &ry, &rz, &a, &b);

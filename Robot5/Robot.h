@@ -5,5 +5,5 @@
 #include"EcmDriver.h"
 #include<iostream>
 
-int InitSystem(double ratio[], double Pitch[], int pusle[], double HLimit[], double LLimit[]);
+int InitSystem(double ratio[], double Pitch[], int pusle[], double HLimit[], double LLimit[], int dirReverse[], int wAxisMap[]);
 void CloseSystem();
