@@ -3,3 +3,7 @@
 #include"MCSL.h"
 #include"kinematics.h"
 #include"EcmDriver.h"
+#include<iostream>
+
+int InitSystem(double ratio[], double Pitch[], int pusle[], double HLimit[], double LLimit[]);
+void CloseSystem();
