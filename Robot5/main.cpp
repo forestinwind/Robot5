@@ -20,7 +20,7 @@ int main()
 	double x, y, z, rx, ry, rz, a, b;
 	MCS_GetCurRefPos(&x, &y, &z, &rx, &ry, &rz, &a, &b);
 	std::cout << x << "," << y << "," << z << "," << rx << "," << ry << "," << rz << std::endl;
-	moveCommander.MoveIntime(0, 10, 10, 0, 30, 0, 5);
+	moveCommander.MoveIntime(0, 10, 10, 0, 0, 0, 5);
 	MCS_SetPtPSpeed(1);
 	MCS_JogSpace(5, 1, 0);
 	MCS_PtPX(5);
