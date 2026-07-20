@@ -18,6 +18,9 @@
     <ClInclude Include="Robot.h">
       <Filter>头文件</Filter>
     </ClInclude>
+    <ClInclude Include="MoveCommander.h">
+      <Filter>头文件</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="Robot.cpp">

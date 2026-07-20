@@ -2,6 +2,7 @@
 
 #include"Robot.h"
 
+#include<iostream>
 namespace RinnRobotCommander{
     class MoveCommander{
     private:
@@ -32,6 +33,7 @@ namespace RinnRobotCommander{
             double x, y, z, rx, ry, rz, a, b;
             MCS_GetCurRefPos(&x, &y, &z, &rx, &ry, &rz, &a, &b);
             SetSpeed(dx/sec,dy/sec,dz/sec,drx/sec,dry/sec,drz/sec);
+            std::cout<<"rated: " << dx / sec << ", " << dy / sec << ", " << dz / sec << ", " << drx / sec << ", " << dry / sec << ", " << drz / sec << std::endl;
             MCS_PtP(dx,dy,dz,drx,dry,drz,0,0);
         }
         ~MoveCommander(){

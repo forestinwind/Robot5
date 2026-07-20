@@ -7,3 +7,4 @@
 
 int InitSystem(double ratio[], double Pitch[], int pusle[], double HLimit[], double LLimit[], int dirReverse[], int wAxisMap[]);
 void CloseSystem();
+int GetAbsEncValue(int* absshift23, int channel);

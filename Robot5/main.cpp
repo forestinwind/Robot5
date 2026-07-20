@@ -5,9 +5,9 @@
 #include"MoveCommander.h"
 int main()
 {	
-	int   Pusle[8] = { 131072, 131072, 131072, 131072, 131072, 131072, 0, 0 };
-	double Pitch[8] = { 5,5,10,117.81,2 * M_PI,2 * M_PI,2 * M_PI,20 };
-	double Ratio[8] = { 1.0, 1.0, 1.0, 10.0, 30.0, 75.0, 0, 0 };
+	int   Pusle[8] = { 131072, 131072, 131072, 131072, 131072, 131072, 131072, 131072 };
+	double Pitch[8] = { 5,5,10,124.54,2 * M_PI,2 * M_PI,2 * M_PI,20 };
+	double Ratio[8] = { 1.0, 1.0, 1.0, 10.0, 50, 81, 25, 1 };
 	double HLimit[8] = { 200,200,200,200,200,200,200,20 };
 	double LLimit[8] = { -200,-200,-200,-200,-200,-200,-200,20 };
 	int dirReverse[8] = { 0,0,0,0,1,1,0,0 };
@@ -21,9 +21,6 @@ int main()
 	MCS_GetCurRefPos(&x, &y, &z, &rx, &ry, &rz, &a, &b);
 	std::cout << x << "," << y << "," << z << "," << rx << "," << ry << "," << rz << std::endl;
 	moveCommander.MoveIntime(0, 10, 10, 0, 0, 0, 5);
-	MCS_SetPtPSpeed(1);
-	MCS_JogSpace(5, 1, 0);
-	MCS_PtPX(5);
 	MCS_GetCurRefPos(&x, &y, &z, &rx, &ry, &rz, &a, &b);
 	std::cout << x << "," << y << "," << z << "," << rx << "," << ry << "," << rz << std::endl;
 	// CloseSystem(); // No longer needed, handled by MoveCommander destructor

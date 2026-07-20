@@ -12,6 +12,7 @@ int InitSystem(double ratio[], double Pitch[], int pusle[], double HLimit[], dou
     MCS_SetSysMaxSpeed(1500);//1000mm/s
     nRtn = MCS_CloseSystem();
     //////////////////////////////////////////////////////////////////////////////////////////
+    //各轴最大安全速度 = (wRPM / 60) ×(dfPitch / dfGearRatio)
     for (WORD wChannel = 0; wChannel < (m_nAxisNum); wChannel++)
     {
         stMacParam.wPosToEncoderDir = dirReverse[wChannel];
@@ -43,7 +44,15 @@ int InitSystem(double ratio[], double Pitch[], int pusle[], double HLimit[], dou
     g_nGroupIndex = MCS_CreateGroup(wAxisMap[0], wAxisMap[1], wAxisMap[2],
         wAxisMap[3], wAxisMap[4], wAxisMap[5], wAxisMap[6], wAxisMap[7], 0);
     stCardConfig.wCardType = 4;
-
+    ECM_SetPdoConfEnable(1);
+    nRtn = ECM_NewPdoConfTbl(7);
+    nRtn = ECM_SetPdoAsDrive(0, 1);
+    nRtn = ECM_SetPdoAsDrive(1, 1);
+    nRtn = ECM_SetPdoAsDrive(2, 1);
+    nRtn = ECM_SetPdoAsDrive(3, 1);
+    nRtn = ECM_SetPdoAsDrive(4, 1);
+    nRtn = ECM_SetPdoAsDrive(5, 1);
+    nRtn = ECM_SetPdoAsDrive(6, 1);
     nRtn = MCS_InitSystemEx(1, &stCardConfig, 1);
     if (nRtn != 0)
     {
@@ -67,4 +76,15 @@ void CloseSystem()
         MCS_SetServoOff(i);
     }
     MCS_CloseSystem();
+}
+
+int GetAbsEncValue(int* absshift23, int channel)
+{
+    int* pEncHandle = nullptr;
+    ECM_GetObjAddr(0, channel, 1, &pEncHandle);
+    if (pEncHandle != nullptr)
+    {
+        *absshift23 = *pEncHandle;
+    }
+    return 0;
 }
