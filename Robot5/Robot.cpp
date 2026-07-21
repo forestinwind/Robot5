@@ -81,10 +81,31 @@ void CloseSystem()
 int GetAbsEncValue(int* absshift23, int channel)
 {
     int* pEncHandle = nullptr;
-    ECM_GetObjAddr(0, channel, 1, &pEncHandle);
-    if (pEncHandle != nullptr)
-    {
-        *absshift23 = *pEncHandle;
+    int ret = ECM_GetObjAddr(0, channel, 1, &pEncHandle);
+    if (ret != 1 || pEncHandle == nullptr) {
+        return -1;   // 读取失败
+    }
+    *absshift23 = *pEncHandle;
+    return 0;
+}
+
+int SetAbsPos(int Encvalue0[], double ratio[], double Pitch[], int pusle[], int wAxisMap[])
+{
+    int Encvalue[8] = { 0 };   // 全部初始化为0
+	double pos[8] = { 0.0 };   // 全部初始化为0.0
+    for (int i = 0; i < 8; i++) {
+        if (wAxisMap[i] == -1) continue;   // 跳过未使用的轴
+
+        if (GetAbsEncValue(&Encvalue[i], i) != 0) {
+            return -1;
+        }
+
+        // 计算当前物理位置 (单位：mm)
+        pos[i] = (double)(Encvalue[i] - Encvalue0[i]) / pusle[i] * Pitch[i] / ratio[i];
+    }
+	for (int i = 0; i < 8; i++) {
+        if (wAxisMap[i] == -1) continue;   // 跳过未使用的轴
+        MCS_DefinePos(i, pos[wAxisMap[i]], 0);   // 将当前位置定义为 pos[i]
     }
     return 0;
 }
