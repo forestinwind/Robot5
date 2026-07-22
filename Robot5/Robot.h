@@ -9,3 +9,5 @@ int InitSystem(double ratio[], double Pitch[], int pusle[], double HLimit[], dou
 void CloseSystem();
 int GetAbsEncValue(int* absshift23, int channel);
 int SetAbsPos(int Encvalue0[], double ratio[], double Pitch[], int pusle[], int wAxisMap[]);
+
+int testmotion();

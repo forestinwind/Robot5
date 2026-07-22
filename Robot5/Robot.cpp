@@ -109,3 +109,21 @@ int SetAbsPos(int Encvalue0[], double ratio[], double Pitch[], int pusle[], int 
     }
     return 0;
 }
+
+int testmotion()
+{
+	int nRtn;
+    //MCS_CustomMotionEx
+    nRtn = MCS_SetAccType('T', 0); //轨迹规划设置为 T 型曲线
+    nRtn = MCS_SetDecType('T', 0);
+    nRtn = MCS_SetAccTime(100, 0); //设置加速度时间
+    nRtn = MCS_SetDecTime(100, 0);
+    nRtn = MCS_SetFeedSpeed(10, 0); //设置进给速度
+    nRtn = MCS_Line(10, 10, 0, 0, 0, 0, 0, 0, 0); //XY 直线插补运动到点（10,10），单位：mm
+    nRtn = MCS_CircleXY(20, 20, 0, 0); //XY 平面以点（20,20）为圆心画圆
+    //nRtn = MCS_ArcXY(5, 20, 3, 30, 0); //XY 平面以当前点为起点，经过点(5,20)走圆弧插补到达目标点（3, 30）
+    nRtn = MCS_Line(20, 20, 0, 0, 0, 0, 0, 0, 0); //XY 平面直线插补
+    //nRtn = MCS_CircleXY(20, 5, 30, 3); //在 XY 平面，从当前点经点（20，5）走圆弧插补到目标点（3，30）
+    nRtn = MCS_Line(-10, -10, 10, 0, 0, 0, 0, 0, 0); //在 XY 平面走直线插补回到点（10,10）,单位：mm
+    return 0;
+}

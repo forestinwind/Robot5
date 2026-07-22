@@ -3,6 +3,13 @@
 #include<cmath>
 #include"Robot.h"
 #include"MoveCommander.h"
+int ReZero()
+{
+	int nRtn;
+	nRtn = MCS_SetPtPSpeed(1);
+	nRtn = MCS_PtP(0, 0, 0, 0, 0, 0, 0, 0);
+	return nRtn;
+}
 int main()
 {	
 	int   Pusle[8] = { 131072, 131072, 131072, 131072, 131072, 131072, 131072, 131072 };
