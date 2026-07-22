@@ -7,7 +7,7 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_EXTENSIONS OFF)
 
 # 添加可执行文件
-add_executable(Robot5 main.cpp Robot.cpp)
+add_executable(Robot5 src/main.cpp src/Robot.cpp)
 
 # 头文件包含目录（DLL 文件夹）
 target_include_directories(Robot5 PRIVATE ${CMAKE_SOURCE_DIR}/DLL)
