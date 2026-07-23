@@ -1,12 +1,20 @@
-﻿#include "Robot.h"
+﻿#define _USE_MATH_DEFINES
+#include "Robot.h"
+#include"MCSL_Fun.h"
+#include"MCSL.h"
+#include"kinematics.h"
+#include"EcmDriver.h"
+#include<cmath>
 
-
-int InitSystem(double ratio[], double Pitch[], int pusle[], double HLimit[], double LLimit[], int dirReverse[], int wAxisMap[])
+#define nAxisNum 8
+#define CARD_INDEX 0
+#define nGroupIndex 0
+int controlSystem::InitSystem(double ratio[], double Pitch[], int pusle[], double HLimit[], double LLimit[], int dirReverse[], int wAxisMap[])
 {
     SYS_MAC_PARAM      stMacParam;
     SYS_ENCODER_CONFIG stENCConfig;
     SYS_CARD_CONFIG    stCardConfig;
-    int m_nAxisNum = 8;
+    int m_nAxisNum = nAxisNum;
     int nRtn;
     int g_nGroupIndex;
     MCS_SetSysMaxSpeed(1500);//1000mm/s
@@ -42,7 +50,12 @@ int InitSystem(double ratio[], double Pitch[], int pusle[], double HLimit[], dou
     //  set group parameters
     MCS_CloseAllGroups();
     g_nGroupIndex = MCS_CreateGroup(wAxisMap[0], wAxisMap[1], wAxisMap[2],
-        wAxisMap[3], wAxisMap[4], wAxisMap[5], wAxisMap[6], wAxisMap[7], 0);
+        wAxisMap[3], wAxisMap[4], wAxisMap[5], wAxisMap[6], wAxisMap[7], CARD_INDEX);
+    nRtn = MCS_SetMirrorAxis(-1, 1, -1, -1, -1, -1, -1, -1, g_nGroupIndex);
+    if(nRtn != 0)
+    {
+        return nRtn;
+	}
     stCardConfig.wCardType = 4;
     ECM_SetPdoConfEnable(1);
     nRtn = ECM_NewPdoConfTbl(7);
@@ -54,11 +67,21 @@ int InitSystem(double ratio[], double Pitch[], int pusle[], double HLimit[], dou
     nRtn = ECM_SetPdoAsDrive(5, 1);
     nRtn = ECM_SetPdoAsDrive(6, 1);
     nRtn = MCS_InitSystemEx(1, &stCardConfig, 1);
+
     if (nRtn != 0)
     {
         return nRtn;
     }
     MCS_SetOverTravelCheck(1, 1, 1, 1, 1, 1, 1, 1, g_nGroupIndex);
+    ECM_EncEnableLatch(1);
+    MCS_SetAccTime(300, g_nGroupIndex);
+    MCS_SetDecTime(300, g_nGroupIndex);
+
+    MCS_SetAccType('T', g_nGroupIndex);
+    MCS_SetDecType('T', g_nGroupIndex);
+    MCS_SetPtPAccType('T', 'T', 'T', 'T', 'T', 'T', 'T', 'T', g_nGroupIndex);
+    MCS_SetPtPDecType('T', 'T', 'T', 'T', 'T', 'T', 'T', 'T', g_nGroupIndex);
+
     MCS_SetAbsolute(g_nGroupIndex);   // 设为绝对坐标模式
     for (int i = 0; i < (m_nAxisNum); i++)
     {
@@ -68,17 +91,17 @@ int InitSystem(double ratio[], double Pitch[], int pusle[], double HLimit[], dou
     return 0;
 }
 
-void CloseSystem()
+void controlSystem::CloseSystem()
 {
     int i;
-    for (i = 0; i < (5); i++)
+    for (i = 0; i < (nAxisNum); i++)
     {
         MCS_SetServoOff(i);
     }
     MCS_CloseSystem();
 }
 
-int GetAbsEncValue(int* absshift23, int channel)
+int controlSystem::GetAbsEncValue(int* absshift23, int channel)
 {
     int* pEncHandle = nullptr;
     int ret = ECM_GetObjAddr(0, channel, 1, &pEncHandle);
@@ -89,7 +112,7 @@ int GetAbsEncValue(int* absshift23, int channel)
     return 0;
 }
 
-int SetAbsPos(int Encvalue0[], double ratio[], double Pitch[], int pusle[], int wAxisMap[])
+int controlSystem::SetAbsPos(int Encvalue0[], double ratio[], double Pitch[], int pusle[], int wAxisMap[])
 {
     int Encvalue[8] = { 0 };   // 全部初始化为0
 	double pos[8] = { 0.0 };   // 全部初始化为0.0
@@ -110,7 +133,39 @@ int SetAbsPos(int Encvalue0[], double ratio[], double Pitch[], int pusle[], int 
     return 0;
 }
 
-int testmotion()
+int controlSystem::DefinePos(int Axis, double pos)
+{
+    return MCS_DefinePos(Axis, pos, nGroupIndex);
+}
+
+int controlSystem::GetCurJPos(JointPositions* pos)
+{
+	int Status = 0;
+    Status = MCS_GetCurPos(&pos->j1, &pos->j2, &pos->j3, &pos->j4, &pos->j5, &pos->j6, &pos->j7, &pos->j8, nGroupIndex);
+    pos->j4 = pos->j4 * 180 / M_PI;
+    pos->j5 = pos->j5 * 180 / M_PI;
+    pos->j6 = pos->j6 * 180 / M_PI;
+    return Status;
+}
+
+double controlSystem::SetPtPSpeed(double dRatio)
+{
+    return MCS_SetPtPSpeed(dRatio, nGroupIndex);
+}
+
+int controlSystem::SetPtPSpeedEx(double dfRatioX, double dfRatioY, double dfRatioZ, double dfRatioU, double dfRatioV, double dfRatioW)
+{
+    return MCS_SetPtPSpeedEx(dfRatioX, dfRatioY, dfRatioZ, dfRatioU, dfRatioV, dfRatioW, 0, 0, nGroupIndex);
+}
+
+int controlSystem::MovePTP(JointPositions* pos)
+{
+    if(pos==nullptr)
+        return -1;
+    return MCS_PtP_V6(pos->j1, pos->j2, pos->j3, pos->j4, pos->j5, pos->j6, 0, 0, nGroupIndex);
+}
+
+int controlSystem::testmotion()
 {
 	int nRtn;
     //MCS_CustomMotionEx

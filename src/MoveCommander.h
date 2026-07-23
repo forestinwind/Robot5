@@ -16,12 +16,12 @@ namespace RinnRobotCommander{
             return deg*M_PI/180;
         }
         void SetSpeed(double dx,double dy,double dz,double drx,double dry,double drz){
-            MCS_SetPtPSpeedEx(convexSpeed(dx,0),convexSpeed(dy,1),convexSpeed(dz,2),
-                convexSpeed(drx,3),convexSpeed(dry,4),convexSpeed(drz,5),0,0);
+            controlSystem::SetPtPSpeedEx(convexSpeed(dx,0),convexSpeed(dy,1),convexSpeed(dz,2),
+                convexSpeed(drx,3),convexSpeed(dry,4),convexSpeed(drz,5));
         }
     public:
         MoveCommander(double ratio[], double Pitch[], int pusle[], double HLimit[], double LLimit[], int dirReverse[], int wAxisMap[],double toolPos[3] = nullptr){
-            int nRtn = InitSystem(ratio, Pitch, pusle, HLimit, LLimit, dirReverse, wAxisMap);
+            int nRtn = controlSystem::InitSystem(ratio, Pitch, pusle, HLimit, LLimit, dirReverse, wAxisMap);
             wRPM = 50;
             if(toolPos){
                 tool_Pos[0] = toolPos[0];
@@ -33,14 +33,16 @@ namespace RinnRobotCommander{
             }
         }
         void MoveIntime(double dx,double dy,double dz,double drx,double dry,double drz,double sec){
-            double x, y, z, rx, ry, rz, a, b;
-            MCS_GetCurRefPos(&x, &y, &z, &rx, &ry, &rz, &a, &b);
+            JointPositions *pos = new JointPositions();
+            controlSystem::GetCurJPos(pos);
             SetSpeed(dx/sec,dy/sec,dz/sec,drx/sec,dry/sec,drz/sec);
             std::cout<<"rated: " << dx / sec << ", " << dy / sec << ", " << dz / sec << ", " << drx / sec << ", " << dry / sec << ", " << drz / sec << std::endl;
-            MCS_PtP(dx,dy,dz,drx,dry,drz,0,0);
+            pos->j1 =dx, pos->j2 = dy, pos->j3 = dz, pos->j4 = drx, pos->j5 = dry, pos->j6 = drz;
+            controlSystem::MovePTP(pos);
+            delete pos;
         }
         ~MoveCommander(){
-            CloseSystem();
+            controlSystem::CloseSystem();
         }
     }; 
 }
