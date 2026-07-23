@@ -50,5 +50,6 @@ int main()
 	//controlSystem::GetCurJPos(pos);
 	//printPos(pos);
 	// CloseSystem(); // No longer needed, handled by MoveCommander destructor
+	delete pos;
 	return 0;
 }

@@ -9,6 +9,7 @@
 #define nAxisNum 8
 #define CARD_INDEX 0
 #define nGroupIndex 0
+
 int controlSystem::InitSystem(double ratio[], double Pitch[], int pusle[], double HLimit[], double LLimit[], int dirReverse[], int wAxisMap[])
 {
     SYS_MAC_PARAM      stMacParam;
