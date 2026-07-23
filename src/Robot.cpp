@@ -163,7 +163,32 @@ int controlSystem::MovePTP(JointPositions* pos)
 {
     if(pos==nullptr)
         return -1;
+    pos->j4 = pos->j4 * M_PI / 180;
+    pos->j5 = pos->j5 * M_PI / 180;
+    pos->j6 = pos->j6 * M_PI / 180;
     return MCS_PtP_V6(pos->j1, pos->j2, pos->j3, pos->j4, pos->j5, pos->j6, 0, 0, nGroupIndex);
+}
+
+void controlSystem::SetServoON(int axis, bool Enable)
+{
+    if (Enable)
+    {
+        MCS_SetServoOn(axis, nGroupIndex);
+    }
+    else
+    {
+        MCS_SetServoOff(axis, nGroupIndex);
+    }
+}
+
+void controlSystem::AbortMotion()
+{
+    MCS_AbortMotion(nGroupIndex);
+}
+
+int controlSystem::GetMotionStatus()
+{
+    return MCS_GetMotionStatus(nGroupIndex);
 }
 
 int controlSystem::testmotion()

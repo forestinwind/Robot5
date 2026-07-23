@@ -33,6 +33,20 @@ public:
 	static int  SetPtPSpeedEx(double dfRatioX, double dfRatioY, double dfRatioZ, double dfRatioU, double dfRatioV, double dfRatioW);
 	// ptp点位运动到绝对位置
 	static int  MovePTP(JointPositions* pos);
+	// 上、下使能伺服
+	static void SetServoON(int axis, bool Enable);
+	// 停止运行
+	static void AbortMotion();
+	/*  GetMotionStatus() 返回值
+	0 GMS_RUNNING 处于运动状态，尚有运动命令未执行完成
+	1 GMS_STOP 处于停止状态，已无库存运动命令
+	2 GMS_HOLD 处于暂停状态(因使用者呼叫MCS_HoldMotion)
+	3 GMS_DELAYING 处于延迟状态(因使用者呼叫MCS_DelayMotion)
+	4 GMS_BLOCKHOLD
+	5 GMS_MPGING
+	其他失败*/
+	static int GetMotionStatus();
+
 
 	// 获取世界坐标
 	//int  GetCurCPos(double* dfCurX, double* dfCurY, double* dfCurZ, double* dfCurRX, double* dfCurRY, double* dfCurRZ, double* dfCurA, double* dfCurB, DWORD* pdwPosture);
@@ -62,19 +76,6 @@ public:
 	void SetGPIOOutPutValue(int Value);
 	// 获取GPIO输出值
 	void GetGPIOOutPutValue(int* Value);
-	// 停止运行
-	void AbortMotion();
-	// 上、下使能伺服
-	void SetServoON(int axis, bool Enable);
-	/*  GetMotionStatus() 返回值
-		0 GMS_RUNNING 处于运动状态，尚有运动命令未执行完成
-		1 GMS_STOP 处于停止状态，已无库存运动命令
-		2 GMS_HOLD 处于暂停状态(因使用者呼叫MCS_HoldMotion)
-		3 GMS_DELAYING 处于延迟状态(因使用者呼叫MCS_DelayMotion)
-		4 GMS_BLOCKHOLD
-		5 GMS_MPGING
-		其他失败*/
-	int GetMotionStatus();
 	// 清除报警
 	int ClearError();
 	void GetCompPos(int32_t* X0, int32_t* X1, int* num, int32_t* A0, int32_t* A1);
