@@ -9,8 +9,9 @@
 #define nAxisNum 8
 #define CARD_INDEX 0
 #define nGroupIndex 0
+double nInterpolateTime = 1;
 
-int controlSystem::InitSystem(double ratio[], double Pitch[], int pusle[], double HLimit[], double LLimit[], int dirReverse[], int wAxisMap[])
+int controlSystem::InitSystem(double ratio[], double Pitch[], int pusle[], double HLimit[], double LLimit[], int dirReverse[], int wAxisMap[],int wAxisMirror[])
 {
     SYS_MAC_PARAM      stMacParam;
     SYS_ENCODER_CONFIG stENCConfig;
@@ -52,11 +53,7 @@ int controlSystem::InitSystem(double ratio[], double Pitch[], int pusle[], doubl
     MCS_CloseAllGroups();
     g_nGroupIndex = MCS_CreateGroup(wAxisMap[0], wAxisMap[1], wAxisMap[2],
         wAxisMap[3], wAxisMap[4], wAxisMap[5], wAxisMap[6], wAxisMap[7], CARD_INDEX);
-    nRtn = MCS_SetMirrorAxis(-1, 1, -1, -1, -1, -1, -1, -1, g_nGroupIndex);
-    if(nRtn != 0)
-    {
-        return nRtn;
-	}
+    nRtn = MCS_SetMirrorAxis(wAxisMirror[0], wAxisMirror[1], wAxisMirror[2], wAxisMirror[3], wAxisMirror[4], wAxisMirror[5], wAxisMirror[6], wAxisMirror[7], g_nGroupIndex);
     stCardConfig.wCardType = 4;
     ECM_SetPdoConfEnable(1);
     nRtn = ECM_NewPdoConfTbl(7);
@@ -65,10 +62,9 @@ int controlSystem::InitSystem(double ratio[], double Pitch[], int pusle[], doubl
     nRtn = ECM_SetPdoAsDrive(2, 1);
     nRtn = ECM_SetPdoAsDrive(3, 1);
     nRtn = ECM_SetPdoAsDrive(4, 1);
-    nRtn = ECM_SetPdoAsDrive(5, 1);
-    nRtn = ECM_SetPdoAsDrive(6, 1);
-    nRtn = MCS_InitSystemEx(1, &stCardConfig, 1);
-
+    //nRtn = ECM_SetPdoAsDrive(5, 1);
+    //nRtn = ECM_SetPdoAsDrive(6, 1);
+    nRtn = MCS_InitSystemEx(nInterpolateTime, &stCardConfig, 1);
     if (nRtn != 0)
     {
         return nRtn;
@@ -166,7 +162,7 @@ int controlSystem::MovePTP(JointPositions* pos)
     pos->j4 = pos->j4 * M_PI / 180;
     pos->j5 = pos->j5 * M_PI / 180;
     pos->j6 = pos->j6 * M_PI / 180;
-    return MCS_PtP_V6(pos->j1, pos->j2, pos->j3, pos->j4, pos->j5, pos->j6, 0, 0, nGroupIndex);
+    return MCS_PtP(pos->j1, pos->j2, pos->j3, pos->j4, pos->j5, pos->j6, 0, 0, nGroupIndex);
 }
 
 void controlSystem::SetServoON(int axis, bool Enable)
@@ -191,20 +187,103 @@ int controlSystem::GetMotionStatus()
     return MCS_GetMotionStatus(nGroupIndex);
 }
 
-int controlSystem::testmotion()
+int controlSystem::GoHome(double dfSpeedRatio)
 {
-	int nRtn;
-    //MCS_CustomMotionEx
-    nRtn = MCS_SetAccType('T', 0); //轨迹规划设置为 T 型曲线
-    nRtn = MCS_SetDecType('T', 0);
-    nRtn = MCS_SetAccTime(100, 0); //设置加速度时间
-    nRtn = MCS_SetDecTime(100, 0);
-    nRtn = MCS_SetFeedSpeed(10, 0); //设置进给速度
-    nRtn = MCS_Line(10, 10, 0, 0, 0, 0, 0, 0, 0); //XY 直线插补运动到点（10,10），单位：mm
-    nRtn = MCS_CircleXY(20, 20, 0, 0); //XY 平面以点（20,20）为圆心画圆
-    //nRtn = MCS_ArcXY(5, 20, 3, 30, 0); //XY 平面以当前点为起点，经过点(5,20)走圆弧插补到达目标点（3, 30）
-    nRtn = MCS_Line(20, 20, 0, 0, 0, 0, 0, 0, 0); //XY 平面直线插补
-    //nRtn = MCS_CircleXY(20, 5, 30, 3); //在 XY 平面，从当前点经点（20，5）走圆弧插补到目标点（3，30）
-    nRtn = MCS_Line(-10, -10, 10, 0, 0, 0, 0, 0, 0); //在 XY 平面走直线插补回到点（10,10）,单位：mm
+    // 1. 检查运动状态
+    if (MCS_GetMotionStatus(nGroupIndex) != GMS_STOP) {
+        return -1;
+    }
+    // 2. 检查错误
+    if (MCS_GetErrorCode(nGroupIndex) != 0) {
+        return -2;
+    }
+    // 3. 确保是绝对坐标模式
+    MCS_SetAbsolute(nGroupIndex);
+    // 4. 设置速度
+    if (dfSpeedRatio < 1) dfSpeedRatio = 1;
+    if (dfSpeedRatio > 100) dfSpeedRatio = 100;
+    MCS_SetPtPSpeed(dfSpeedRatio, nGroupIndex);
+    // 5. 移动到 0
+    int ret = MCS_PtP(0, 0, 0, 0, 0, 0, 0, 0, nGroupIndex, AXIS_ALL);
+    if (ret < 0) return ret;
+    // 6. 等待完成
+    while (MCS_GetMotionStatus(nGroupIndex) != GMS_STOP) {
+        Sleep(10);
+    }
     return 0;
+}
+
+int controlSystem::JogPulse(int Axis, int Pulse)
+{
+    return MCS_JogPulse(Pulse, Axis, nGroupIndex);
+}
+
+int controlSystem::JogPtpSpace(int Axis, double Space, double speedRatio)
+{
+    return MCS_JogSpace(Space, speedRatio, Axis, nGroupIndex);
+}
+
+int controlSystem::SetAccTime(double dfAccTime)
+{
+    const double MIN_ACC_TIME = 20.0;   // 最小20ms
+    const double MAX_ACC_TIME = 5000.0; // 最大5000ms
+
+    if (dfAccTime < MIN_ACC_TIME) dfAccTime = MIN_ACC_TIME;
+    if (dfAccTime > MAX_ACC_TIME) dfAccTime = MAX_ACC_TIME;
+    return MCS_SetAccTime(dfAccTime, nGroupIndex);
+}
+
+int controlSystem::SetDecTime(double dfDecTime)
+{
+    const double MIN_DEC_TIME = 20.0;
+    const double MAX_DEC_TIME = 5000.0;
+
+    if (dfDecTime < MIN_DEC_TIME) dfDecTime = MIN_DEC_TIME;
+    if (dfDecTime > MAX_DEC_TIME) dfDecTime = MAX_DEC_TIME;
+    return MCS_SetDecTime(dfDecTime, nGroupIndex);
+}
+
+double controlSystem::SetFeedSpeed(double Speed)
+{
+    return MCS_SetFeedSpeed(Speed, nGroupIndex);
+}
+
+double controlSystem::SetInterpolateTime(double msec)
+{
+    if (msec < 1 || msec >= 50)return-1;
+    nInterpolateTime = msec;
+    return 0.0;
+}
+
+int controlSystem::MoveLine(JointPositions* pos)
+{
+    if (pos == nullptr)
+        return -1;
+    pos->j4 = pos->j4 * M_PI / 180;
+    pos->j5 = pos->j5 * M_PI / 180;
+    pos->j6 = pos->j6 * M_PI / 180;
+    return MCS_Line(pos->j1, pos->j2, pos->j3, pos->j4, pos->j5, pos->j6, 0, 0, nGroupIndex, 255);
+}
+
+int controlSystem::MoveArc(JointPositions* mid_pos, JointPositions* targer_pos_rot)
+{
+    if (mid_pos == nullptr|| targer_pos_rot == nullptr)
+        return -1;
+    targer_pos_rot->j4 = targer_pos_rot->j4 * M_PI / 180;
+    targer_pos_rot->j5 = targer_pos_rot->j5 * M_PI / 180;
+    targer_pos_rot->j6 = targer_pos_rot->j6 * M_PI / 180;
+    return MCS_ArcXYZ_Aux(mid_pos->j1, mid_pos->j2, mid_pos->j3,
+        targer_pos_rot->j1, targer_pos_rot->j2, targer_pos_rot->j3,
+        targer_pos_rot->j4, targer_pos_rot->j5, targer_pos_rot->j6,
+        0, 0, nGroupIndex);
+}
+
+int controlSystem::GetECatErrorCode()
+{
+    return MCS_GetErrorCode(nGroupIndex);
+}
+
+int controlSystem::ClearError()
+{
+    return MCS_ClearError(nGroupIndex);
 }

@@ -2,12 +2,12 @@
 #include<iostream>
 
 typedef struct {
-	double j1;
-	double j2;
-	double j3;
-	double j4; // deg
-	double j5; // deg
-	double j6; // deg
+	double j1; //X
+	double j2; //Y
+	double j3; //Z
+	double j4; // RXdeg
+	double j5; // RYdeg
+	double j6; // RZdeg
 	double j7;
 	double j8;
 } JointPositions;
@@ -16,7 +16,7 @@ class controlSystem {
     controlSystem() = delete;
 public:
 	// 初始化系统：减速比、导程、脉冲数、正限位、负限位、电机正反转、轴映射
-    static int InitSystem(double ratio[], double Pitch[], int pusle[], double HLimit[], double LLimit[], int dirReverse[], int wAxisMap[]);
+	static int InitSystem(double ratio[], double Pitch[], int pusle[], double HLimit[], double LLimit[], int dirReverse[], int wAxisMap[], int wAxisMirror[]);
 	// 关闭系统
     static void CloseSystem();
 	// 获取绝对编码器值
@@ -35,7 +35,7 @@ public:
 	static int  MovePTP(JointPositions* pos);
 	// 上、下使能伺服
 	static void SetServoON(int axis, bool Enable);
-	// 停止运行
+	// 停止运行   测试
 	static void AbortMotion();
 	/*  GetMotionStatus() 返回值
 	0 GMS_RUNNING 处于运动状态，尚有运动命令未执行完成
@@ -46,26 +46,31 @@ public:
 	5 GMS_MPGING
 	其他失败*/
 	static int GetMotionStatus();
+	//回零点  测试
+	static int GoHome(double dfSpeedRatio = 10.0);
+	// Jog 点位运行脉冲数  测试
+	static int  JogPulse(int Axis, int Pulse);
+	// Jog 点位运行距离    测试
+	static int  JogPtpSpace(int Axis, double Space, double speedRatio);
+	// 设置加减速时间  测试
+	static int SetAccTime(double dfAccTime);
+	static int SetDecTime(double dfDecTime);
+	// 设置插补速度mm/sec  测试
+	static double  SetFeedSpeed(double Speed);
+	// 设置插值时间ms
+	static double  SetInterpolateTime(double msec);
+	// 法兰盘坐标运动到绝对位置  测试
+	static int  MoveLine(JointPositions* pos);
+    // 法兰盘坐标运动空间圆轨迹  测试
+	static int  MoveArc(JointPositions* mid_pos, JointPositions* targer_pos_rot);
+	// 获取总线错误代码
+	static int  GetECatErrorCode();
+	// 清除报警
+	static int ClearError();
 
-
-	// 获取世界坐标
-	//int  GetCurCPos(double* dfCurX, double* dfCurY, double* dfCurZ, double* dfCurRX, double* dfCurRY, double* dfCurRZ, double* dfCurA, double* dfCurB, DWORD* pdwPosture);
-	// Jog 点位运行脉冲数
-	int  JogPulse(int Axis, int Pulse);
-	// Jog 点位运行距离
-	int  JogPtpSpace(int Axis, double Space, double speedRatio);
-	// 世界坐标运动到绝对位置
-	//int  MoveLine(double dfCX, double dfCY, double dfCZ, double dfCRX, double dfCRY, double dfCRZ, double dfCA, DWORD posture);
-	// 世界坐标运动XYZR空间轨迹
-	//int  ArcXYZ_Aux(double dfX0, double dfY0, double dfZ0, double dfX1, double dfY1, double dfZ1, double dfRX1, double dfRY1, double dfRZ1, DWORD posture);
-	// XY 平面设置圆心和RX\RY\RZ目标位置和圆周运动方向
-    //int CircleXY(double cx, double cy, double rx, double ry, double rz, BYTE byCirDir, DWORD posture = 0);
 	// Jog运动直线距离
 	int  JogLineSpace(int Axis, double Space, double Speed);
-	// 设置插补速度
-	double  SetLineSpeed(double Speed);
-	// 获取总线错误代码
-	int  GetECatErrorCode();
+
 	// 获取EIO输入值
 	void GetEIOIntPutValue(int* Value);
 	// 设置EIO输出值
@@ -76,18 +81,14 @@ public:
 	void SetGPIOOutPutValue(int Value);
 	// 获取GPIO输出值
 	void GetGPIOOutPutValue(int* Value);
-	// 清除报警
-	int ClearError();
+
 	void GetCompPos(int32_t* X0, int32_t* X1, int* num, int32_t* A0, int32_t* A1);
 	void SetCompEnable(int status, int Speca);
-	// 设置加减速时间
-	int SetAccTime(double dfAccTime);
-	int SetDecTime(double dfDecTime);
+
 	// 获取缓冲区运动指令数量
 	int GetCommandCount(int* pnCmdCount);
 	// 清空缓冲区运动指令数量
 	int ResetCommandIndex();
 	// 设置平滑
 	int  SetBlending(bool  sw);
-    static int testmotion();
 };

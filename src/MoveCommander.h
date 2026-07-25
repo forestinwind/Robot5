@@ -21,7 +21,7 @@ namespace RinnRobotCommander{
         }
     public:
         MoveCommander(double ratio[], double Pitch[], int pusle[], double HLimit[], double LLimit[], int dirReverse[], int wAxisMap[],double toolPos[3] = nullptr){
-            int nRtn = controlSystem::InitSystem(ratio, Pitch, pusle, HLimit, LLimit, dirReverse, wAxisMap);
+            //int nRtn = controlSystem::InitSystem(ratio, Pitch, pusle, HLimit, LLimit, dirReverse, wAxisMap);
             wRPM = 50;
             if(toolPos){
                 tool_Pos[0] = toolPos[0];
