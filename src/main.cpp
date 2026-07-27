@@ -36,6 +36,22 @@ void printEnc()
 	std::cout << "end" << std::endl;
 
 }
+void rotateCur(double deg){
+	
+	JointPositions* pos = new JointPositions();
+	controlSystem::GetCurJPos(pos);
+	
+	auto pos1 = RinnRobotCommander::MoveCommander::
+		rotateRy(Eigen::Vector3d(pos->j4, pos->j5, pos->j6), 
+		Eigen::Vector3d(pos->j1, pos->j2, pos->j3), deg/2);
+	auto pos2 = RinnRobotCommander::MoveCommander::
+		rotateRy(Eigen::Vector3d(pos->j4, pos->j5, pos->j6), 
+		Eigen::Vector3d(pos->j1, pos->j2, pos->j3), deg);
+	delete pos;
+	auto pos1_struct = RinnRobotCommander::MoveCommander::newPos(pos1, Eigen::Vector3d(pos->j4, pos->j5 + deg/2, pos->j6));
+	auto pos2_struct = RinnRobotCommander::MoveCommander::newPos(pos2, Eigen::Vector3d(pos->j4, pos->j5 + deg, pos->j6));
+	controlSystem::MoveArc(&pos1_struct, &pos2_struct);
+}
 bool SavePositionsToTxt(const std::vector<JointPositions>& positions, const std::string& filename, int precision = 6)
 {
 	if (positions.empty()) {
@@ -129,6 +145,7 @@ int main()
 	controlSystem::InitSystem(Ratio, Pitch, Pusle, HLimit, LLimit, dirReverse, wAxisMap, wAxisMirror);
 	controlSystem::SetAbsPos(Encvalue0, Ratio, Pitch, Pusle, wAxisMap);
 	testmotion();
+	rotateCur(90);
 	controlSystem::CloseSystem();
 	return 0;
 }

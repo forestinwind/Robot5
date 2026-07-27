@@ -8,6 +8,28 @@ set(CMAKE_CXX_EXTENSIONS OFF)
 
 # 添加可执行文件
 add_executable(Robot5 src/main.cpp src/Robot.cpp)
+set_target_properties(Robot5 PROPERTIES VS_STARTUP_PROJECT TRUE)
+
+# ---------- 新增：Eigen3 查找与集成 ----------
+if(Eigen3_FOUND)
+    message(STATUS "Eigen3 found: ${Eigen3_VERSION}")
+    target_link_libraries(Robot5 Eigen3::Eigen)   # 自动添加包含路径
+else()
+    find_path(EIGEN3_INCLUDE_DIR "Eigen/Dense"
+        HINTS
+            "$ENV{EIGEN3_DIR}"
+            "C:/Program Files/eigen/include"
+            "C:/local/include"
+            "/usr/include/eigen3"
+    )
+    if(EIGEN3_INCLUDE_DIR)
+        message(STATUS "Eigen3 include found at: ${EIGEN3_INCLUDE_DIR}")
+        target_include_directories(Robot5 PRIVATE ${EIGEN3_INCLUDE_DIR})
+    else()
+        message(FATAL_ERROR "Eigen3 not found. Install Eigen or set EIGEN3_DIR environment variable to the Eigen include path.")
+    endif()
+endif()
+# ---------- Eigen3 集成结束 ----------
 
 # 头文件包含目录（DLL 文件夹）
 target_include_directories(Robot5 PRIVATE ${CMAKE_SOURCE_DIR}/DLL)
@@ -32,14 +54,11 @@ endif()
 # ------------------------------
 set(DLL_DIR ${CMAKE_SOURCE_DIR}/DLL)
 
-# 假设 DLL 文件名与库名一致，但后缀为 .dll
-# 如果你需要区分 Debug/Release 版本，可以使用生成器表达式或分别指定
 set(DLL_FILES
     ${DLL_DIR}/MCSLPCI_PMC.dll
     ${DLL_DIR}/PMCPCIDrv.dll
 )
 
-# 添加 post-build 命令，在每个 dll 文件存在时才复制（避免报错）
 foreach(DLL_FILE ${DLL_FILES})
     if(EXISTS ${DLL_FILE})
         add_custom_command(TARGET Robot5 POST_BUILD
