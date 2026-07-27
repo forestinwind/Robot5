@@ -52,18 +52,18 @@ namespace RinnRobotCommander{
                 tool_Speed[i] = wRPM*Pitch[i+1]/ratio[i+1];
             }
         }
-        void MoveIntime(double dx,double dy,double dz,double drx,double dry,double drz,double sec){
-            JointPositions *pos = new JointPositions();
-            controlSystem::GetCurJPos(pos);
-            Eigen::Vector3d tipPos = getFlangeLoc(Eigen::Vector3d(rx,ry,rz),Eigen::Vector3d(x,y,z));
-            Eigen::Vector3d targetPos = tipPos + Eigen::Vector3d(dx,dy,dz);
-            Eigen::Vector3d targetDir = Eigen::Vector3d(rx + drx, ry + dry, rz + drz);
-            Eigen::Vector3d targetFlangePos = deFlangeLoc(targetDir,targetPos);
-            SetSpeed(dx/sec,dy/sec,dz/sec,drx/sec,dry/sec,drz/sec);
-            std::cout<<"rated: " << dx / sec << ", " << dy / sec << ", " << dz / sec << ", " << drx / sec << ", " << dry / sec << ", " << drz / sec << std::endl;
-            pos->j1 =dx, pos->j2 = dy, pos->j3 = dz, pos->j4 = drx, pos->j5 = dry, pos->j6 = drz;
-            controlSystem::MovePTP(pos);
-            delete pos;
+        
+        static Eigen::Vector3d rotateRy(Eigen::Vector3d dir,Eigen::Vector3d p, double deg){
+            Eigen::Vector3d newDir = dir;
+            newDir.y() += deg;
+            auto targetLoc = deFlangeLoc(dir,p);
+            return getFlangeLoc(newDir,targetLoc);
+        }
+        static JointPositions newPos(Eigen::Vector3d pos,Eigen::Vector3d dir){
+            JointPositions *ret = new JointPositions();
+            ret->j1 = pos.x(), ret->j2 = pos.y(), ret->j3 = pos.z();
+            ret->j4 = dir.x(), ret->j5 = dir.y(), ret->j6 = dir.z();
+            return *ret;
         }
         ~MoveCommander(){
             controlSystem::CloseSystem();
