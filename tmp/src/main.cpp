@@ -47,9 +47,9 @@ void rotateCur(double deg){
 	auto pos2 = RinnRobotCommander::MoveCommander::
 		rotateRy(Eigen::Vector3d(pos->j4, pos->j5, pos->j6), 
 		Eigen::Vector3d(pos->j1, pos->j2, pos->j3), deg);
+	delete pos;
 	auto pos1_struct = RinnRobotCommander::MoveCommander::newPos(pos1, Eigen::Vector3d(pos->j4, pos->j5 + deg/2, pos->j6));
 	auto pos2_struct = RinnRobotCommander::MoveCommander::newPos(pos2, Eigen::Vector3d(pos->j4, pos->j5 + deg, pos->j6));
-	delete pos;
 	controlSystem::MoveArc(&pos1_struct, &pos2_struct);
 }
 bool SavePositionsToTxt(const std::vector<JointPositions>& positions, const std::string& filename, int precision = 6)
@@ -83,17 +83,13 @@ int testmotion()
 
 	controlSystem::GetCurJPos(pos);
 	printPos(pos);
-	//mpos->j1 = 25, mpos->j2 = 25, mpos->j3 = 0;
-	//mpos1->j1 = 50, mpos1->j2 = 0, mpos1->j3 = 0;
-	//mpos1->j4 = 90, mpos1->j5 = 0, mpos1->j6 = 0;
+	mpos->j1 = 25, mpos->j2 = 25, mpos->j3 = 0;
+	mpos->j1 = 50, mpos->j2 = 0, mpos->j3 = 0;
 	std::cout << "start motion test..." << std::endl;
 	//motion function
-
-
-	controlSystem::SetFeedSpeed(1);
-	rotateCur(20);
-	//controlSystem::MoveArc(mpos, mpos1);
-
+	//nRtn = controlSystem::SetFeedSpeed(5);
+	//nRtn = controlSystem::MoveLine(mpos);
+	//nRtn = controlSystem::MoveArc(mpos, mpos1);
 	//record positions
 	while (true)
 	{
@@ -136,25 +132,20 @@ int main()
 	// 在InitSystem前 接线排序 X、Y、Z、A、B  131072*4/20
 	double Pitch[8] = { 10,			16.66,    124.54,	2 * M_PI,		2 * M_PI,2 * M_PI,20 ,2 * M_PI };
 	double Ratio[8] = { 1,			 1,			20,     50,			30,   1,     1,      1 };
-	double HLimit[8] = { 400,  200,   10,  M_PI / 2,   M_PI / 4,    2 * M_PI + 0.5 ,  2.5 * M_PI , 20 };
-	double LLimit[8] = { -400,  -200,  -400, -M_PI / 2,   -M_PI / 4,    -2 * M_PI - 0.5 , -2.5 * M_PI ,-20 };
+	double HLimit[8] = { 200,200,200,200,200,200,200,20 };
+	double LLimit[8] = { -200,-200,-200,-200,-200,-200,-200,20 };
 	int dirReverse[8] = { 0,0,0,0,0,0,0,0 };
 	// X,Y,Z,RX,RY,RZ
 	int wAxisMap[8] = { 0,1,2,3,4,-1,-1, -1 };
 	//零点编码器值
-	//int Encvalue0[8] = { 132151,1025432,210274,-5537291,16333,0,0,0 };
-	int Encvalue0[8] = { 132238,1025464,-2420927,-5537289,16332,0,0,0 };
+	int Encvalue0[8] = { 132151,1025432,210274,-5537291,16333,0,0,0 };
 	//将物理通道镜像逻辑轴，-1表示不使用镜像
 	int wAxisMirror[8] = { -1,-1,-1,-1,-1,-1 ,-1,-1 };
 	//测试
 	controlSystem::InitSystem(Ratio, Pitch, Pusle, HLimit, LLimit, dirReverse, wAxisMap, wAxisMirror);
 	controlSystem::SetAbsPos(Encvalue0, Ratio, Pitch, Pusle, wAxisMap);
-	controlSystem::GoHome(1);
-
-
 	testmotion();
-
-
+	rotateCur(90);
 	controlSystem::CloseSystem();
 	return 0;
 }

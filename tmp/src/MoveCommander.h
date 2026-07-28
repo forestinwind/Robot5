@@ -69,5 +69,5 @@ namespace RinnRobotCommander{
             controlSystem::CloseSystem();
         }
     };
-    const Eigen::Vector3d MoveCommander::moveDir(0,0,-25);
+    const Eigen::Vector3d MoveCommander::moveDir(1.05,0.69,-504.41);
 }
