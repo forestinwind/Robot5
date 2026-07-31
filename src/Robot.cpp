@@ -62,8 +62,8 @@ int controlSystem::InitSystem(double ratio[], double Pitch[], int pusle[], doubl
     nRtn = ECM_SetPdoAsDrive(2, 1);
     nRtn = ECM_SetPdoAsDrive(3, 1);
     nRtn = ECM_SetPdoAsDrive(4, 1);
-    //nRtn = ECM_SetPdoAsDrive(5, 1);
-    //nRtn = ECM_SetPdoAsDrive(6, 1);
+    nRtn = ECM_SetPdoAsDrive(5, 1);
+    nRtn = ECM_SetPdoAsDrive(6, 1);
     nRtn = MCS_InitSystemEx(nInterpolateTime, &stCardConfig, 1);
     if (nRtn != 0)
     {
@@ -148,11 +148,6 @@ int controlSystem::GetCurJPos(JointPositions* pos)
 double controlSystem::SetPtPSpeed(double dRatio)
 {
     return MCS_SetPtPSpeed(dRatio, nGroupIndex);
-}
-
-int controlSystem::SetPtPSpeedEx(double dfRatioX, double dfRatioY, double dfRatioZ, double dfRatioU, double dfRatioV, double dfRatioW)
-{
-    return MCS_SetPtPSpeedEx(dfRatioX, dfRatioY, dfRatioZ, dfRatioU, dfRatioV, dfRatioW, 0, 0, nGroupIndex);
 }
 
 int controlSystem::MovePTP(JointPositions* pos)

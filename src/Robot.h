@@ -29,13 +29,11 @@ public:
 	static int  GetCurJPos(JointPositions* pos);
 	// 设置点位速度比例
 	static double  SetPtPSpeed(double dRatio);
-	// 设置点位速度比例
-	static int  SetPtPSpeedEx(double dfRatioX, double dfRatioY, double dfRatioZ, double dfRatioU, double dfRatioV, double dfRatioW);
 	// ptp点位运动到绝对位置
 	static int  MovePTP(JointPositions* pos);
 	// 上、下使能伺服
 	static void SetServoON(int axis, bool Enable);
-	// 停止运行   测试
+	// 停止运行
 	static void AbortMotion();
 	/*  GetMotionStatus() 返回值
 	0 GMS_RUNNING 处于运动状态，尚有运动命令未执行完成
@@ -46,22 +44,22 @@ public:
 	5 GMS_MPGING
 	其他失败*/
 	static int GetMotionStatus();
-	//回零点  测试
+	//回零点
 	static int GoHome(double dfSpeedRatio = 10.0);
-	// Jog 点位运行脉冲数  测试
+	// Jog 点位运行脉冲数
 	static int  JogPulse(int Axis, int Pulse);
-	// Jog 点位运行距离    测试
+	// Jog 点位运行距离 /rad
 	static int  JogPtpSpace(int Axis, double Space, double speedRatio);
-	// 设置加减速时间  测试
+	// 设置加减速时间 
 	static int SetAccTime(double dfAccTime);
 	static int SetDecTime(double dfDecTime);
-	// 设置插补速度mm/sec  测试
+	// 设置插补速度mm/sec
 	static double  SetFeedSpeed(double Speed);
 	// 设置插值时间ms
 	static double  SetInterpolateTime(double msec);
-	// 法兰盘坐标运动到绝对位置  测试
+	// 法兰盘坐标运动到绝对位置
 	static int  MoveLine(JointPositions* pos);
-    // 法兰盘坐标运动空间圆轨迹  测试
+    // 法兰盘坐标运动空间圆轨迹
 	static int  MoveArc(JointPositions* mid_pos, JointPositions* targer_pos_rot);
 	// 获取总线错误代码
 	static int  GetECatErrorCode();

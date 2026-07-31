@@ -83,15 +83,19 @@ int testmotion()
 
 	controlSystem::GetCurJPos(pos);
 	printPos(pos);
-	//mpos->j1 = 25, mpos->j2 = 25, mpos->j3 = 0;
+	mpos->j1 = 50, mpos->j2 = 0, mpos->j3 = 0;
+	mpos->j4 = 0, mpos->j5 = 0, mpos->j6 = 0;
 	//mpos1->j1 = 50, mpos1->j2 = 0, mpos1->j3 = 0;
 	//mpos1->j4 = 90, mpos1->j5 = 0, mpos1->j6 = 0;
 	std::cout << "start motion test..." << std::endl;
 	//motion function
 
+	//controlSystem::SetPtPSpeed(1);
+	//controlSystem::MovePTP(mpos);
 
-	controlSystem::SetFeedSpeed(1);
-	rotateCur(20);
+	controlSystem::SetFeedSpeed(2);
+	//controlSystem::MoveLine(mpos);
+	//rotateCur(20);
 	//controlSystem::MoveArc(mpos, mpos1);
 
 	//record positions
@@ -142,19 +146,20 @@ int main()
 	// X,Y,Z,RX,RY,RZ
 	int wAxisMap[8] = { 0,1,2,3,4,-1,-1, -1 };
 	//零点编码器值
-	//int Encvalue0[8] = { 132151,1025432,210274,-5537291,16333,0,0,0 };
-	int Encvalue0[8] = { 132238,1025464,-2420927,-5537289,16332,0,0,0 };
+	int Encvalue0[8] = { 132282,-1184821,-2421091,7450751,70946,0,0,0 };
+	//int Encvalue0[8] = { 132258,1027941,-2421002,6904615,16339,0,0,0 };
 	//将物理通道镜像逻辑轴，-1表示不使用镜像
 	int wAxisMirror[8] = { -1,-1,-1,-1,-1,-1 ,-1,-1 };
 	//测试
 	controlSystem::InitSystem(Ratio, Pitch, Pusle, HLimit, LLimit, dirReverse, wAxisMap, wAxisMirror);
+	printEnc();
 	controlSystem::SetAbsPos(Encvalue0, Ratio, Pitch, Pusle, wAxisMap);
 	controlSystem::GoHome(1);
 
 
 	testmotion();
 
-
+	printEnc();
 	controlSystem::CloseSystem();
 	return 0;
 }

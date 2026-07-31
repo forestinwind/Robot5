@@ -36,8 +36,9 @@ namespace RinnRobotCommander{
             return deg*M_PI/180;
         }
         void SetSpeed(double dx,double dy,double dz,double drx,double dry,double drz){
-            controlSystem::SetPtPSpeedEx(convexSpeed(dx,0),convexSpeed(dy,1),convexSpeed(dz,2),
-                convexSpeed(drx,3),convexSpeed(dry,4),convexSpeed(drz,5));
+            //SetPtPSpeedEx∆˙”√
+            //controlSystem::SetPtPSpeedEx(convexSpeed(dx,0),convexSpeed(dy,1),convexSpeed(dz,2),
+            //    convexSpeed(drx,3),convexSpeed(dry,4),convexSpeed(drz,5));
         }
     public:
         MoveCommander(double ratio[], double Pitch[], int pusle[], double HLimit[], double LLimit[], int dirReverse[], int wAxisMap[],double toolPos[3] = nullptr){
