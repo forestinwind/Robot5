@@ -145,7 +145,7 @@ int main()
 	controlSystem::InitSystem(Ratio, Pitch, Pusle, HLimit, LLimit, dirReverse, wAxisMap, wAxisMirror);
 	controlSystem::SetAbsPos(Encvalue0, Ratio, Pitch, Pusle, wAxisMap);
 	testmotion();
-	rotateCur(90);
+	rotateCur2(30,30);
 	controlSystem::CloseSystem();
 	return 0;
 }
