@@ -87,7 +87,9 @@ int testmotion()
 	mpos->j1 = 50, mpos->j2 = 0, mpos->j3 = 0;
 	std::cout << "start motion test..." << std::endl;
 	//motion function
-	//nRtn = controlSystem::SetFeedSpeed(5);
+	
+	nRtn = controlSystem::SetFeedSpeed(5);
+	rotateCur2(30,30);
 	//nRtn = controlSystem::MoveLine(mpos);
 	//nRtn = controlSystem::MoveArc(mpos, mpos1);
 	//record positions
