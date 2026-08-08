@@ -13,6 +13,11 @@ typedef struct {
 } JointPositions;
 
 std::ostream& operator<<(std::ostream &os, const JointPositions &pos);
+JointPositions operator+(const JointPositions &a, const JointPositions &b);
+JointPositions operator-(const JointPositions &a, const JointPositions &b);
+JointPositions operator*(const JointPositions &a, double scalar);
+JointPositions operator/(const JointPositions &a, double scalar);
+JointPositions xyzTojp(double x,double y,double z);
 class controlSystem {
     controlSystem() = delete;
 public:
@@ -58,6 +63,8 @@ public:
 	static double  SetFeedSpeed(double Speed);
 	// 设置插值时间ms
 	static double  SetInterpolateTime(double msec);
+
+	static int JogLine(double x,double y,double z);
 	// 法兰盘坐标运动到绝对位置
 	static int  MoveLine(JointPositions* pos);
     // 法兰盘坐标运动空间圆轨迹

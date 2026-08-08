@@ -22,6 +22,30 @@ std::ostream& operator<<(std::ostream &os, const JointPositions &pos) {
        << ", j8: " << pos.j8
        << ")";
 }
+JointPositions operator+(const JointPositions &a, const JointPositions &b) {
+    return { a.j1 + b.j1, a.j2 + b.j2, a.j3 + b.j3, a.j4 + b.j4, a.j5 + b.j5, a.j6 + b.j6, a.j7 + b.j7, a.j8 + b.j8 };
+}
+JointPositions operator-(const JointPositions &a, const JointPositions &b) {
+    return { a.j1 - b.j1, a.j2 - b.j2, a.j3 - b.j3, a.j4 - b.j4, a.j5 - b.j5, a.j6 - b.j6, a.j7 - b.j7, a.j8 - b.j8 };
+}
+JointPositions operator*(const JointPositions &a, double scalar) {
+    return { a.j1 * scalar, a.j2 * scalar, a.j3 * scalar, a.j4 * scalar, a.j5 * scalar, a.j6 * scalar, a.j7 * scalar, a.j8 * scalar };
+}
+JointPositions operator/(const JointPositions &a, double scalar) {
+    return { a.j1 / scalar, a.j2 / scalar, a.j3 / scalar, a.j4 / scalar, a.j5 / scalar, a.j6 / scalar, a.j7 / scalar, a.j8 / scalar };
+}
+JointPositions xyzTojp(double x,double y,double z){
+    JointPositions pos;
+    pos.j1 = x;
+    pos.j2 = y;
+    pos.j3 = z;
+    pos.j4 = 0;
+    pos.j5 = 0;
+    pos.j6 = 0;
+    pos.j7 = 0;
+    pos.j8 = 0;
+    return pos;
+}
 int controlSystem::InitSystem(double ratio[], double Pitch[], int pusle[], double HLimit[], double LLimit[], int dirReverse[], int wAxisMap[],int wAxisMirror[])
 {
     SYS_MAC_PARAM      stMacParam;
@@ -260,9 +284,18 @@ double controlSystem::SetInterpolateTime(double msec)
     nInterpolateTime = msec;
     return 0.0;
 }
-
+int controlSystem::JogLine(double x,double y,double z)
+{   
+    std::cout << "Moving by: x=" << x << ", y=" << y << ", z=" << z << std::endl;
+    JointPositions curPos;
+    GetCurJPos(&curPos);
+    std::cout << "Current Position: " << curPos << std::endl;
+    curPos = curPos + xyzTojp(x, y, z);
+    std::cout << "Target Position: " << curPos << std::endl;
+    return MoveLine(&curPos);
+}
 int controlSystem::MoveLine(JointPositions* pos)
-{
+{  
     if (pos == nullptr)
         return -1;
     pos->j4 = pos->j4 * M_PI / 180;

@@ -6,9 +6,9 @@
 #include<Windows.h>
 #include"Robot.h"
 #include"MoveCommander.h"
+#include"AppMajWindow.h"
 #include<vector>
 #include<functional>
-
 void printPos(JointPositions* pos) {
 	if (pos == nullptr) {
 		std::cout << "Position is null." << std::endl;
@@ -25,18 +25,7 @@ void printPos(JointPositions* pos) {
 			  << "j8: " << pos->j8
 			  << std::endl;
 }
-void printEnc()
-{
-	int absshift23[8] = { 0 };
-	std::cout << std::endl << "enc:";
-	for (int i = 0; i < 8; i++)
-	{
-		controlSystem::GetAbsEncValue(&absshift23[i], i);
-		std::cout << absshift23[i] << ",";
-	}
-	std::cout << "end" << std::endl;
 
-}
 void rotateCur(double deg){
 	JointPositions pos;
 	controlSystem::GetCurJPos(&pos);
@@ -82,6 +71,7 @@ void gethalfdir(double rz_deg, double ry_deg, double &rrz_deg, double &rry_deg)
     double ry_new = std::asin((std::max)(-1.0, (std::min)(1.0, nz)));
     double rz_new = std::atan2(ny, nx);
 	
+	 
     const double RAD2DEG = 180.0 / M_PI;
     rry_deg = ry_new * RAD2DEG;
     rrz_deg = rz_new * RAD2DEG;
@@ -182,46 +172,16 @@ int testmotion(std::function<void()> motionFunc)
 	delete pos;
 	return 0;
 }
-int main()
-{	//参数设置
-	//int   Pusle[8] = { 131072, 131072, 131072, 131072, 131072, 131072, 131072, 131072 };//龙门
-	//                  //Y1,Y2,X,Z,RZ,RY;
-	//double Pitch[8] = { 10,10,10,124.54,2 * M_PI,2 * M_PI,2 * M_PI,20 };
-	//double Ratio[8] = { 1.0, 1.0, 1.0, 10.0, 50, 81, 25, 1 };
-	//double HLimit[8] = { 200,200,200,200,200,200,200,20 };
-	//double LLimit[8] = { -200,-200,-200,-200,-200,-200,-200,20 };
-	//int dirReverse[8] = { 0,0,0,0,0,0,0,0 };
-	//                   // X,Y,Z,RX,RY,RZ
-	//int wAxisMap[8] = { 2, 0, 3, 6, 5, 4, -1, -1 };
-	////零点编码器值
-	//int Encvalue0[8] = { 8105640,-9610163,-2333917,2130859,-8213689,-1682896,0,0 };
-	////将物理通道镜像逻辑轴，-1表示不使用镜像
-	//int wAxisMirror[8] = { -1,1,-1,-1,-1,-1 ,-1,-1 };
+int main(int argc, char *argv[])
+{
+	AppMajWindow appWindow;
+	appWindow.ShowMajWindow();
 
-
-	int   Pusle[8] = { 131072, 131072, 131072, 131072, 131072, 131072, 131072, 131072 };
-	// 在InitSystem前 接线排序 X、Y、Z、A、B  131072*4/20
-	double Pitch[8] = { 10,			16.66,    124.54,	2 * M_PI,		2 * M_PI,2 * M_PI,20 ,2 * M_PI };
-	double Ratio[8] = { 1,			 1,			20,     50,			30,   1,     1,      1 };
-	double HLimit[8] = { 400,  200,   10,  M_PI / 2,   M_PI / 4,    2 * M_PI + 0.5 ,  2.5 * M_PI , 20 };
-	double LLimit[8] = { -400,  -200,  -400, -M_PI / 2,   -M_PI / 4,    -2 * M_PI - 0.5 , -2.5 * M_PI ,-20 };
-	int dirReverse[8] = { 0,0,0,0,0,0,0,0 };
-	// X,Y,Z,RX,RY,RZ
-	int wAxisMap[8] = { 0,1,2,3,4,-1,-1, -1 };
-	//零点编码器值
-	int Encvalue0[8] = { 132282,-1184821,-2421091,7450751,70946,0,0,0 };
-	//int Encvalue0[8] = { 132258,1027941,-2421002,6904615,16339,0,0,0 };
-	//将物理通道镜像逻辑轴，-1表示不使用镜像
-	int wAxisMirror[8] = { -1,-1,-1,-1,-1,-1 ,-1,-1 };
-	//测试
-	controlSystem::InitSystem(Ratio, Pitch, Pusle, HLimit, LLimit, dirReverse, wAxisMap, wAxisMirror);
-	printEnc();
-	controlSystem::SetAbsPos(Encvalue0, Ratio, Pitch, Pusle, wAxisMap);
 	controlSystem::GoHome(1);
 
 	testmotion([](){ rotateCur2(30,30); });
 
 	printEnc();
-	controlSystem::CloseSystem();
+
 	return 0;
 }
