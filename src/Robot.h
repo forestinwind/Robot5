@@ -18,6 +18,7 @@ JointPositions operator-(const JointPositions &a, const JointPositions &b);
 JointPositions operator*(const JointPositions &a, double scalar);
 JointPositions operator/(const JointPositions &a, double scalar);
 JointPositions xyzTojp(double x,double y,double z);
+JointPositions ryzTojp(double ry,double rz);
 class controlSystem {
     controlSystem() = delete;
 public:
@@ -66,6 +67,8 @@ public:
 
 	static int JogLine(double x,double y,double z);
 	// 法兰盘坐标运动到绝对位置
+	static int JogDir(double ry,double rz);
+	// 法兰盘坐标运动空间直线,ry单位为度，rz单位为度
 	static int  MoveLine(JointPositions* pos);
     // 法兰盘坐标运动空间圆轨迹
 	static int  MoveArc(JointPositions* mid_pos, JointPositions* targer_pos_rot);

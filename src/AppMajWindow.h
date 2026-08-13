@@ -3,10 +3,13 @@
 #include <QApplication>
 #include <QPushButton>
 #include <QVBoxLayout>
+#include <QHBoxLayout>
 #include <QGridLayout>
 #include <QWidget>
 #include <QLineEdit>
-#include <QDebug>          // 可选
+#include <QDebug>
+#include <iostream>
+#include <cmath>          // 用于 M_PI 等
 
 #include "Robot.h"
 #include "MoveCommander.h"
@@ -24,7 +27,7 @@ void printEnc()
     std::cout << "end" << std::endl;
 }
 
-// ---------- 声明 moveDir（三个参数）----------
+// ---------- 平移命令（原有）----------
 void moveDir(double x, double y, double z){
     if(std::abs(x)>100||std::abs(y)>100 
     ||std::abs(z)>100){
@@ -74,88 +77,118 @@ public:
             controlSystem::GoHome(1);
         });
 
-        // 4. 创建六个方向按钮：上、下、左、右、前、后
-        QPushButton *upBtn    = new QPushButton("上");
-        QPushButton *downBtn  = new QPushButton("下");
-        QPushButton *leftBtn  = new QPushButton("左");
-        QPushButton *rightBtn = new QPushButton("右");
-        QPushButton *frontBtn = new QPushButton("前");
-        QPushButton *backBtn  = new QPushButton("后");
+        // 4. 创建平移按钮：+x、-x、+y、-y、+z、-z
+        QPushButton *xPlusBtn    = new QPushButton("+x");
+        QPushButton *xMinusBtn   = new QPushButton("-x");
+        QPushButton *yPlusBtn    = new QPushButton("+y");
+        QPushButton *yMinusBtn   = new QPushButton("-y");
+        QPushButton *zPlusBtn    = new QPushButton("+z");
+        QPushButton *zMinusBtn   = new QPushButton("-z");
 
-        // 5. 创建输入框（放在中间）
+        // 5. 创建旋转按钮：+ry、-ry、+rz、-rz
+        QPushButton *ryPlusBtn   = new QPushButton("+ry");
+        QPushButton *ryMinusBtn  = new QPushButton("-ry");
+        QPushButton *rzPlusBtn   = new QPushButton("+rz");
+        QPushButton *rzMinusBtn  = new QPushButton("-rz");
+
+        // 6. 创建输入框（所有按钮共用此输入框） 
         QLineEdit *lineEdit = new QLineEdit;
-        lineEdit->setPlaceholderText("输入步长数值...");
+        lineEdit->setPlaceholderText("输入速度(mm/s)...");
 
-        // 6. 辅助 lambda：读取输入框内容并转为 double（失败则返回 0.0）
+        QLineEdit *dirEdit = new QLineEdit;
+        dirEdit->setPlaceholderText("输入方向(度/s)...");
+
+        // 7. 辅助 lambda：读取输入框内容并转为 double（失败则返回 0.0）
         auto getValue = [&]() -> double {
             bool ok;
             double val = lineEdit->text().toDouble(&ok);
             return ok ? val : 0.0;
         };
+        auto getDirValue = [&]() -> double {
+            bool ok;
+            double val = dirEdit->text().toDouble(&ok);
+            return ok ? val : 0.0;
+        };
 
-        // 7. 为六个按钮绑定点击事件，分别调用 moveDir 并传入正确参数
-        // 上：+X
-        QObject::connect(upBtn, &QPushButton::clicked, [=]() {
+        // ---------- 绑定平移按钮（调用 moveDir）----------
+        QObject::connect(xPlusBtn, &QPushButton::clicked, [=]() {
             double val = getValue();
             moveDir(val, 0.0, 0.0);
         });
-        // 下：-X
-        QObject::connect(downBtn, &QPushButton::clicked, [=]() {
+        QObject::connect(xMinusBtn, &QPushButton::clicked, [=]() {
             double val = getValue();
             moveDir(-val, 0.0, 0.0);
         });
-        // 左：+Y
-        QObject::connect(leftBtn, &QPushButton::clicked, [=]() {
+        QObject::connect(yPlusBtn, &QPushButton::clicked, [=]() {
             double val = getValue();
             moveDir(0.0, val, 0.0);
         });
-        // 右：-Y
-        QObject::connect(rightBtn, &QPushButton::clicked, [=]() {
+        QObject::connect(yMinusBtn, &QPushButton::clicked, [=]() {
             double val = getValue();
             moveDir(0.0, -val, 0.0);
         });
-        // 前：+Z
-        QObject::connect(frontBtn, &QPushButton::clicked, [=]() {
+        QObject::connect(zPlusBtn, &QPushButton::clicked, [=]() {
             double val = getValue();
             moveDir(0.0, 0.0, val);
         });
-        // 后：-Z
-        QObject::connect(backBtn, &QPushButton::clicked, [=]() {
+        QObject::connect(zMinusBtn, &QPushButton::clicked, [=]() {
             double val = getValue();
             moveDir(0.0, 0.0, -val);
         });
 
-        // 8. 布局：使用 3 行 3 列网格，将六个按钮和输入框合理放置
-        //   第一行：前、上、后
-        //   第二行：左、输入框、右
-        //   第三行：空、下、空（或可放置其他控件）
-        QGridLayout *directionLayout = new QGridLayout();
+        // ---------- 绑定旋转按钮（调用 controlSystem::JogDir）----------
+        QObject::connect(ryPlusBtn, &QPushButton::clicked, [=]() {
+            double val = getDirValue();
+            controlSystem::JogDir(val, 0.0);   // ry 增加
+        });
+        QObject::connect(ryMinusBtn, &QPushButton::clicked, [=]() {
+            double val = getDirValue();
+            controlSystem::JogDir(-val, 0.0);  // ry 减少
+        });
+        QObject::connect(rzPlusBtn, &QPushButton::clicked, [=]() {
+            double val = getDirValue();
+            controlSystem::JogDir(0.0, val);   // rz 增加
+        });
+        QObject::connect(rzMinusBtn, &QPushButton::clicked, [=]() {
+            double val = getDirValue();
+            controlSystem::JogDir(0.0, -val);  // rz 减少
+        });
 
-        // 第一行
-        directionLayout->addWidget(frontBtn, 0, 0, Qt::AlignCenter);
-        directionLayout->addWidget(upBtn,    0, 1, Qt::AlignCenter);
-        directionLayout->addWidget(backBtn,  0, 2, Qt::AlignCenter);
+        // ------------------------------------------------------------
+        // 8. 布局设计：两行水平布局，第一行平移按钮+输入框，第二行旋转按钮
+        // ------------------------------------------------------------
+        // 第一行：平移按钮 + 输入框
+        QHBoxLayout *row1 = new QHBoxLayout();
+        row1->addWidget(xPlusBtn);
+        row1->addWidget(xMinusBtn);
+        row1->addWidget(yPlusBtn);
+        row1->addWidget(yMinusBtn);
+        row1->addWidget(zPlusBtn);
+        row1->addWidget(zMinusBtn);
+        row1->addWidget(lineEdit);   // 输入框放在第一行末尾
+        row1->setSpacing(6);
+        row1->setContentsMargins(10, 5, 10, 5);
 
-        // 第二行
-        directionLayout->addWidget(leftBtn,  1, 0, Qt::AlignCenter);
-        directionLayout->addWidget(lineEdit, 1, 1);
-        directionLayout->addWidget(rightBtn, 1, 2, Qt::AlignCenter);
+        // 第二行：旋转按钮（居中显示）
+        QHBoxLayout *row2 = new QHBoxLayout();
+        row2->addWidget(ryPlusBtn);
+        row2->addWidget(ryMinusBtn);
+        row2->addWidget(rzPlusBtn);
+        row2->addWidget(rzMinusBtn);
+        row2->addWidget(dirEdit);   // 输入框放在第二行末尾
+        row2->setSpacing(6);
+        row2->setContentsMargins(10, 5, 10, 5);
+        // 让第二行居中对齐
+        row2->setAlignment(Qt::AlignCenter);
 
-        // 第三行（下按钮单独放在中间）
-        directionLayout->addWidget(downBtn,  2, 1, Qt::AlignCenter);
-
-        // 设置拉伸，使所有单元格均匀分布，整体居中
-        directionLayout->setColumnStretch(0, 1);
-        directionLayout->setColumnStretch(1, 1);
-        directionLayout->setColumnStretch(2, 1);
-        directionLayout->setRowStretch(0, 1);
-        directionLayout->setRowStretch(1, 1);
-        directionLayout->setRowStretch(2, 1);
-
-        // 9. 主布局：垂直排列 Reset 按钮 + 方向区域
+        // 9. 主布局：垂直排列 Reset 按钮 + 两行
         QVBoxLayout *mainLayout = new QVBoxLayout();
         mainLayout->addWidget(resetBtn);
-        mainLayout->addLayout(directionLayout);
+        mainLayout->addLayout(row1);
+        mainLayout->addLayout(row2);
+        // 让两行水平布局在垂直方向上居中（可选）
+        mainLayout->setAlignment(row1, Qt::AlignCenter);
+        mainLayout->setAlignment(row2, Qt::AlignCenter);
 
         window.setLayout(mainLayout);
 

@@ -46,6 +46,18 @@ JointPositions xyzTojp(double x,double y,double z){
     pos.j8 = 0;
     return pos;
 }
+JointPositions ryzTojp(double ry,double rz){
+    JointPositions pos;
+    pos.j1 = 0;
+    pos.j2 = 0;
+    pos.j3 = 0;
+    pos.j4 = rz;
+    pos.j5 = ry;
+    pos.j6 = 0;
+    pos.j7 = 0;
+    pos.j8 = 0;
+    return pos;
+}
 int controlSystem::InitSystem(double ratio[], double Pitch[], int pusle[], double HLimit[], double LLimit[], int dirReverse[], int wAxisMap[],int wAxisMirror[])
 {
     SYS_MAC_PARAM      stMacParam;
@@ -291,6 +303,16 @@ int controlSystem::JogLine(double x,double y,double z)
     GetCurJPos(&curPos);
     std::cout << "Current Position: " << curPos << std::endl;
     curPos = curPos + xyzTojp(x, y, z);
+    std::cout << "Target Position: " << curPos << std::endl;
+    return MoveLine(&curPos);
+}
+int controlSystem::JogDir(double ry,double rz)
+{
+    std::cout << "Moving by: ry=" << ry << ", rz=" << rz << std::endl;
+    JointPositions curPos;
+    GetCurJPos(&curPos);
+    std::cout << "Current Position: " << curPos << std::endl;
+    curPos = curPos + ryzTojp(ry, rz);
     std::cout << "Target Position: " << curPos << std::endl;
     return MoveLine(&curPos);
 }
